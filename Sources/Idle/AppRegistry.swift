@@ -37,6 +37,7 @@ enum AppRegistry {
         var earnApp: String?
         var mystNodes: String?
         var nodepay: String?
+        var repocket: String?
     }
 
     static var referrals = ReferralCodes(
@@ -45,7 +46,8 @@ enum AppRegistry {
         honeygain: nil,
         earnApp: nil,
         mystNodes: nil,
-        nodepay: nil
+        nodepay: nil,
+        repocket: nil
     )
 
     static var all: [DePinApp] {
@@ -121,6 +123,18 @@ enum AppRegistry {
                 directDownloadURL: nil,
                 kind: .chromeExtension,
                 payoutKind: .token(symbol: "NODE")
+            ),
+            DePinApp(
+                id: "repocket",
+                name: "Repocket",
+                bundleIdentifier: "io.repocket.repocket",
+                appPath: "/Applications/Repocket.app",
+                signupURL: repocketSignupURL(),
+                dashboardURL: URL(string: "https://link.repocket.com/")!,
+                downloadURL: URL(string: "https://link.repocket.com/"),
+                directDownloadURL: nil,
+                kind: .nativeApp,
+                payoutKind: .usd
             )
         ]
     }
@@ -180,5 +194,13 @@ enum AppRegistry {
             return URL(string: "https://nodepay.ai/ref/\(code)")!
         }
         return URL(string: "https://app.nodepay.ai/register")!
+    }
+
+    private static func repocketSignupURL() -> URL {
+        // Repocket uses ?aid= as the referral parameter on link.repocket.com.
+        if let code = referrals.repocket {
+            return URL(string: "https://link.repocket.com/?aid=\(code)")!
+        }
+        return URL(string: "https://link.repocket.com/")!
     }
 }

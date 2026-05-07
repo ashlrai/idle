@@ -1,17 +1,43 @@
 # Idle — DePIN orchestrator for macOS
 
-A native menu-bar app that manages a passive-income stack on Apple Silicon Macs.
-One place to install, launch, and monitor Pawns, Grass, Honeygain, EarnApp,
-MystNodes, and Nodepay.
+[![Build](https://github.com/ashlrai/idle/actions/workflows/build.yml/badge.svg)](https://github.com/ashlrai/idle/actions/workflows/build.yml)
+[![Latest release](https://img.shields.io/github/v/release/ashlrai/idle?label=latest)](https://github.com/ashlrai/idle/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![macOS 13+](https://img.shields.io/badge/macOS-13%2B-black?logo=apple)](https://www.apple.com/macos/)
+[![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-required-purple)](https://support.apple.com/en-us/HT211814)
 
-**Business model: referral aggregation.** Each signup link in the app routes
-through the operator's referral code. The user gets the same earnings they
-would otherwise; the operator earns the 10% lifetime referral commission per
-sub. Scale is the moat.
+A native menu-bar app that turns spare bandwidth on your Mac into small,
+steady passive income. One window for the seven supported DePIN services
+(Pawns, Grass, Honeygain, EarnApp, MystNodes, Nodepay, Repocket), an
+embedded onboarding wizard with credential prefill and OTP capture, an
+aggregated earnings dashboard with Swift Charts trend lines, and an
+optional Verus CPU-mining toggle that's actually profitable on Apple
+Silicon.
+
+**Realistic earnings**: $15–35 / month from one residential US IP for the
+six core bandwidth services, plus another $30–90 / month if you turn on
+Verus mining 24/7 on AC. See [`OPPORTUNITIES.md`](OPPORTUNITIES.md) for the
+honest breakdown.
+
+**One-line install** (requires Homebrew):
+
+```bash
+curl -L https://github.com/ashlrai/idle/releases/latest/download/Idle.dmg -o /tmp/Idle.dmg && hdiutil attach /tmp/Idle.dmg && cp -R /Volumes/Idle/Idle.app /Applications/ && hdiutil detach /Volumes/Idle && xattr -d com.apple.quarantine /Applications/Idle.app && open /Applications/Idle.app
+```
+
+Or [download the DMG](https://github.com/ashlrai/idle/releases/latest/download/Idle.dmg)
+and follow the [install walkthrough](https://idle.ashlr.ai/install).
 
 **Why not Hivello?** Hivello shut down its DePIN orchestrator Jan 30, 2026.
 It was Docker-based and heavy on a 16GB Mac. Idle is native Swift, runs as a
-menu-bar accessory, and ships with no Docker dependency.
+menu-bar accessory, ships with no Docker dependency, and has zero runtime
+dependencies on third-party Swift packages.
+
+**Business model: referral aggregation.** Each signup link in the app routes
+through the operator's referral code (configured via remote JSON at
+`idle.ashlr.ai/config.json`, no rebuild required). The user gets the same
+earnings they would otherwise; the operator earns the 10% lifetime referral
+commission per sub. Scale is the moat.
 
 ---
 

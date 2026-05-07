@@ -29,6 +29,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let earnings = Earnings()
     private let earningsHistory = EarningsHistory()
     private let prices = PriceFetcher()
+    private let mining = Mining()
     private var welcomeWindow: NSWindow?
     private var earningsWindow: NSWindow?
 
@@ -48,6 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 lifecycle: lifecycle,
                 caffeinate: caffeinate,
                 launchAtLogin: launchAtLogin,
+                mining: mining,
                 openDashboards: { [weak self] in self?.showDashboards() },
                 openOnboarding: { [weak self] in self?.showOnboarding() },
                 openEarnings: { [weak self] in self?.showEarnings() }

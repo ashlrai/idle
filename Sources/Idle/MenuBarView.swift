@@ -4,6 +4,7 @@ struct MenuBarView: View {
     @ObservedObject var lifecycle: Lifecycle
     @ObservedObject var caffeinate: Caffeinate
     @ObservedObject var launchAtLogin: LaunchAtLogin
+    @ObservedObject var mining: Mining
     let openDashboards: () -> Void
     let openOnboarding: () -> Void
     let openEarnings: () -> Void
@@ -28,6 +29,8 @@ struct MenuBarView: View {
                 Divider().frame(height: 24)
                 MenuBarLink(systemImage: "square.grid.2x2", title: "Dashboards", action: openDashboards)
             }
+            Divider()
+            miningRow
             Divider()
             footer
         }
@@ -75,6 +78,47 @@ struct MenuBarView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .font(.caption)
+    }
+
+    private var miningRow: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "cpu").foregroundStyle(.orange)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Verus mining").font(.caption.weight(.medium))
+                Text(miningSubtitle).font(.caption2).foregroundStyle(.secondary)
+            }
+            Spacer()
+            switch mining.state {
+            case .notInstalled:
+                Button("Setup") { mining.openInstaller() }
+                    .buttonStyle(.bordered).controlSize(.mini)
+            case .stopped, .error:
+                Button("Start") { mining.start() }
+                    .buttonStyle(.borderedProminent).controlSize(.mini)
+                    .disabled(mining.address.isEmpty)
+            case .starting:
+                ProgressView().controlSize(.mini)
+            case .running:
+                Button("Stop") { mining.stop() }
+                    .buttonStyle(.bordered).controlSize(.mini)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+    }
+
+    private var miningSubtitle: String {
+        switch mining.state {
+        case .notInstalled: return "Run Setup to install cpuminer-verus"
+        case .stopped: return mining.address.isEmpty ? "Set VRSC address in Settings" : "Apple Silicon ~$30-90/mo at AC 24/7"
+        case .starting: return "Starting…"
+        case .running(let threads, let rate):
+            if let r = rate {
+                return String(format: "%d threads · %.2f Mh/s", threads, r / 1_000_000)
+            }
+            return "\(threads) threads · warming up"
+        case .error(let msg): return msg
+        }
     }
 }
 
