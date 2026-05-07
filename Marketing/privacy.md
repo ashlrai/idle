@@ -41,4 +41,4 @@ Each DePIN service signup link routes through the operator's referral code. The 
 
 ## Contact
 
-Open an issue at github.com/your-org/idle.
+Open an issue at github.com/ashlrai/idle.
