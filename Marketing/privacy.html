@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Privacy — Idle</title>
+    <link rel="stylesheet" href="/_layout.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22 font-size=%2214%22>🌿</text></svg>">
+</head>
+<body>
+<div class="wrap">
+    <nav>
+        <a class="brand" href="/"><span class="leaf">🌿</span> Idle</a>
+        <ul>
+            <li><a href="/install">Install</a></li>
+            <li><a href="/privacy">Privacy</a></li>
+            <li><a href="/terms">Terms</a></li>
+        </ul>
+    </nav>
+
+    <article>
+        <h1>Privacy policy</h1>
+        <p class="updated">Last updated: 2026-05-07</p>
+
+        <p>Idle is a native macOS app that you run on your own Mac. It is not a web service. "We" means Ashlr, the operator who builds and distributes Idle.</p>
+
+        <h2>Data Idle stores on your Mac</h2>
+        <ul>
+            <li><strong>Email address</strong>: the email you use for DePIN signups. Stored in macOS UserDefaults under <code>idle.vault.email</code>.</li>
+            <li><strong>Per-app passwords</strong>: 20-character random passwords Idle generates for each DePIN signup. UserDefaults under <code>idle.vault.passwords</code>.</li>
+            <li><strong>Completion state</strong>: which onboarding steps you've marked complete. UserDefaults under <code>idle.vault.completed</code>.</li>
+            <li><strong>Consent timestamps</strong>: when you accepted the welcome screen consents. UserDefaults under <code>idle.welcome.*</code>.</li>
+        </ul>
+        <p>UserDefaults is plain text on disk in <code>~/Library/Preferences/</code>. v0.5 will migrate to the macOS Keychain so it's encrypted at rest.</p>
+
+        <h2>Data Idle does not store</h2>
+        <ul>
+            <li>Your DePIN earnings, payment methods, or wallet seed phrases.</li>
+            <li>Your browsing history outside the embedded DePIN dashboards.</li>
+            <li>Your contacts, files, or anything from other apps.</li>
+        </ul>
+
+        <h2>Data Idle reads from external services</h2>
+        <ul>
+            <li><strong>ipapi.co</strong> — for the pre-flight residential-IP check. Idle sends one HTTP GET to <code>https://ipapi.co/json/</code> and reads the public JSON response. ipapi.co sees your public IP. Nothing else is transmitted.</li>
+            <li><strong>idle.ashlr.ai</strong> — Idle fetches <code>/config.json</code> on launch to update referral codes. The request is anonymous; we do not log your IP or any identifier.</li>
+            <li><strong>Embedded WKWebViews</strong> — when you open the dashboards or onboarding window, each app's web dashboard runs in an embedded browser inside Idle. Cookies and form state live in the standard <code>WKWebsiteDataStore.default()</code>, sandboxed per-app on macOS.</li>
+            <li><strong>Gmail (v0.5+, opt-in)</strong> — if you configure Gmail integration, Idle requests <code>gmail.readonly</code> scope only, fetches messages from a hard-coded allowlist of DePIN sender domains, and parses OTPs and verification links. Idle never reads other emails. Tokens are stored in the macOS Keychain.</li>
+        </ul>
+
+        <h2>Telemetry</h2>
+        <p>Idle has no analytics, crash reporting, or any phone-home of any kind beyond the two requests listed above. There are no third-party SDKs in the binary.</p>
+
+        <h2>Referrals</h2>
+        <p>Each DePIN service signup link routes through Ashlr's referral code. The DePIN service may credit Ashlr with a 10% lifetime commission on your earnings — paid by the service, not by you. Your earnings are unchanged. The DePIN service knows you signed up via referral; it does not share any data with us.</p>
+
+        <h2>Your rights</h2>
+        <ul>
+            <li>Delete all Idle data: drag <code>Idle.app</code> to the trash, then <code>defaults delete ai.ashlr.idle</code>.</li>
+            <li>Export the credential vault: read <code>~/Library/Preferences/ai.ashlr.idle.plist</code>.</li>
+            <li>Revoke OAuth scopes (when v0.5 ships): <a href="https://myaccount.google.com/security">myaccount.google.com/security</a> → Third-party access.</li>
+        </ul>
+
+        <h2>Contact</h2>
+        <p>Open an issue at <a href="https://github.com/ashlr/idle">github.com/ashlr/idle</a>.</p>
+    </article>
+
+    <footer>
+        <div>© Ashlr · Idle is open source.</div>
+        <ul>
+            <li><a href="/privacy">Privacy</a></li>
+            <li><a href="/terms">Terms</a></li>
+            <li><a href="https://github.com/ashlr/idle">GitHub</a></li>
+        </ul>
+    </footer>
+</div>
+</body>
+</html>

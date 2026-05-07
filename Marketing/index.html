@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Idle — passive income from your Mac</title>
+    <meta name="description" content="A native menu-bar app for macOS that turns your idle Mac into a small, steady passive-income machine. Realistic earnings: $15-35/month from one residential IP.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22 font-size=%2214%22>🌿</text></svg>">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --panel: #141414;
+            --border: rgba(255,255,255,0.08);
+            --fg: #fafafa;
+            --mute: #a3a3a3;
+            --accent: #34d399;
+            --warn: #f59e0b;
+        }
+        * { box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+            margin: 0;
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+        }
+        a { color: inherit; text-decoration: none; }
+        a:hover { color: var(--accent); }
+        .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+        nav { padding: 24px 0; display: flex; align-items: center; justify-content: space-between; }
+        nav .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+        nav .brand .leaf { color: var(--accent); }
+        nav ul { display: flex; gap: 28px; list-style: none; padding: 0; margin: 0; color: var(--mute); }
+
+        .hero { padding: 80px 0 64px; text-align: center; }
+        .hero h1 { font-size: 64px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 20px; }
+        .hero p.lead { font-size: 22px; color: var(--mute); max-width: 640px; margin: 0 auto 36px; }
+        .hero .cta {
+            display: inline-flex; gap: 12px; align-items: center;
+            background: var(--fg); color: var(--bg); padding: 16px 28px; border-radius: 12px;
+            font-weight: 600; font-size: 17px;
+        }
+        .hero .cta:hover { background: var(--accent); color: var(--bg); }
+        .hero .meta { margin-top: 14px; color: var(--mute); font-size: 14px; }
+
+        .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 40px 0 80px; }
+        @media (max-width: 720px) { .panels { grid-template-columns: 1fr; } }
+        .panel {
+            background: var(--panel); border: 1px solid var(--border);
+            border-radius: 16px; padding: 24px;
+        }
+        .panel h3 { margin: 0 0 8px; font-size: 18px; }
+        .panel p { margin: 0; color: var(--mute); font-size: 15px; }
+        .panel.expectations { background: rgba(52,211,153,0.07); border-color: rgba(52,211,153,0.2); }
+        .panel.expectations h3 { color: var(--accent); }
+
+        section { padding: 64px 0; border-top: 1px solid var(--border); }
+        section h2 { font-size: 36px; letter-spacing: -0.01em; margin: 0 0 12px; }
+        section p.tag { color: var(--mute); margin: 0 0 32px; font-size: 17px; }
+
+        .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        @media (max-width: 720px) { .features { grid-template-columns: 1fr; } }
+        .feature {
+            background: var(--panel); border: 1px solid var(--border);
+            border-radius: 14px; padding: 20px;
+        }
+        .feature h4 { margin: 0 0 6px; font-size: 16px; }
+        .feature p { margin: 0; color: var(--mute); font-size: 14px; }
+
+        .honest {
+            background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.22);
+            border-radius: 14px; padding: 24px; margin-top: 24px;
+        }
+        .honest h4 { color: var(--warn); margin: 0 0 8px; font-size: 16px; }
+        .honest ul { margin: 0; padding-left: 20px; color: var(--mute); font-size: 14px; }
+        .honest li { margin: 6px 0; }
+
+        footer {
+            border-top: 1px solid var(--border); padding: 36px 0 80px;
+            color: var(--mute); font-size: 14px;
+            display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+        }
+        footer ul { list-style: none; padding: 0; margin: 0; display: flex; gap: 18px; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <nav>
+        <div class="brand"><span class="leaf">🌿</span> Idle</div>
+        <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#honest">Honest expectations</a></li>
+            <li><a href="#download">Download</a></li>
+        </ul>
+    </nav>
+
+    <header class="hero" id="download">
+        <h1>Your Mac, idle, earning.</h1>
+        <p class="lead">A native menu-bar app that turns spare bandwidth on your Mac into small, steady passive income — without the Docker stacks and dashboards-in-tabs of the alternatives.</p>
+        <a class="cta" href="https://github.com/your-org/idle/releases/latest/download/Idle.dmg">⬇︎ Download for macOS</a>
+        <div class="meta">macOS 13+ · Apple Silicon · Free · Open source</div>
+    </header>
+
+    <div class="panels">
+        <div class="panel expectations">
+            <h3>Realistic earnings</h3>
+            <p><strong>$15 – $35 / month</strong> from a single residential US IP, plus speculative crypto-token upside (GRASS, MYST, NODE).</p>
+        </div>
+        <div class="panel">
+            <h3>Why not Hivello?</h3>
+            <p>Hivello shut down its DePIN orchestrator on Jan 30, 2026. Idle is the native Swift successor — no Docker, no dashboard tabs, no monthly fee.</p>
+        </div>
+    </div>
+
+    <section id="features">
+        <h2>What it does</h2>
+        <p class="tag">Six DePIN services in one menu-bar app.</p>
+        <div class="features">
+            <div class="feature"><h4>Pre-flight checks</h4><p>Verifies Apple Silicon, macOS version, AC power, no VPN, residential IP — before you waste time signing up.</p></div>
+            <div class="feature"><h4>Onboarding wizard</h4><p>Embedded WKWebViews per signup, JS prefill of email + password, OTP auto-detect from your clipboard.</p></div>
+            <div class="feature"><h4>Unified dashboards</h4><p>One window with all six dashboards in a sidebar. Cookies persist, you stay signed in.</p></div>
+            <div class="feature"><h4>Stay-awake + battery care</h4><p>Manages caffeinate so the Mac stays online 24/7. Recommends macOS 80% charging limit.</p></div>
+            <div class="feature"><h4>Launch at login</h4><p>SMAppService integration so Idle starts when your Mac wakes. No Terminal required.</p></div>
+            <div class="feature"><h4>Referral attribution</h4><p>Refer friends, earn 10% of their earnings forever. Tracked inside Idle.</p></div>
+        </div>
+    </section>
+
+    <section id="honest">
+        <h2>What we won't promise</h2>
+        <p class="tag">If you've seen "$500/month passive income from your laptop," that's almost always survey stacking. Here's the honest version.</p>
+
+        <div class="honest">
+            <h4>Hard limits — these need you, not the app</h4>
+            <ul>
+                <li>SMS verification (Pawns) — code is on your phone. Idle detects the OTP when you copy it; you click insert.</li>
+                <li>Email OTP / verification links — Idle detects them on the clipboard. v0.5 will read Gmail directly with your consent.</li>
+                <li>Phantom seed phrase for GRASS payouts — must be on paper.</li>
+                <li>Google OAuth signups — you click. Idle never holds your Google credentials.</li>
+                <li>Chrome Web Store extension installs — Chrome blocks scripted installs. We open the page; you click "Add to Chrome."</li>
+            </ul>
+        </div>
+
+        <div class="honest">
+            <h4>Risks you accept</h4>
+            <ul>
+                <li>Your residential ISP's terms may forbid bandwidth resale (Comcast/Spectrum).</li>
+                <li>Your IP becomes the egress for buyers' traffic (mostly AI training and BI scraping).</li>
+                <li>24/7 plug-in degrades battery without the 80% charging limit.</li>
+                <li>Token income is taxable on receipt at fair-market value. Cash income is 1099-reportable above $600/yr.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <div>© Idle. Built on Apple Silicon.</div>
+        <ul>
+            <li><a href="privacy.html">Privacy</a></li>
+            <li><a href="terms.html">Terms</a></li>
+            <li><a href="https://github.com/your-org/idle">GitHub</a></li>
+        </ul>
+    </footer>
+</div>
+</body>
+</html>

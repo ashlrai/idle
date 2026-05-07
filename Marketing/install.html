@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Install — Idle</title>
+    <link rel="stylesheet" href="/_layout.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22 font-size=%2214%22>🌿</text></svg>">
+    <style>
+        .step {
+            display: flex; gap: 18px; align-items: flex-start;
+            background: var(--panel); border: 1px solid var(--border);
+            border-radius: 12px; padding: 20px; margin: 12px 0;
+        }
+        .step .num {
+            flex: 0 0 36px; height: 36px; border-radius: 18px;
+            background: var(--accent); color: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+        }
+        .step h3 { margin: 0 0 6px; font-size: 17px; color: var(--fg); }
+        .step p { margin: 0; }
+        .gatekeeper {
+            background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.22);
+            border-radius: 12px; padding: 20px; margin: 24px 0;
+        }
+        .gatekeeper h3 { color: var(--warn); margin: 0 0 8px; }
+        .download-btn {
+            display: inline-flex; align-items: center; gap: 12px;
+            background: var(--fg); color: var(--bg); padding: 14px 24px;
+            border-radius: 12px; font-weight: 600; font-size: 16px;
+            text-decoration: none;
+            margin: 24px 0;
+        }
+        .download-btn:hover { background: var(--accent); color: var(--bg); }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <nav>
+        <a class="brand" href="/"><span class="leaf">🌿</span> Idle</a>
+        <ul>
+            <li><a href="/install">Install</a></li>
+            <li><a href="/privacy">Privacy</a></li>
+            <li><a href="/terms">Terms</a></li>
+        </ul>
+    </nav>
+
+    <article>
+        <h1>Installing Idle</h1>
+        <p class="updated">Takes 2-3 minutes. macOS 13 (Ventura) or later, Apple Silicon recommended.</p>
+
+        <a class="download-btn" href="https://github.com/ashlr/idle/releases/latest/download/Idle.dmg">
+            ⬇︎ Download Idle.dmg <span style="opacity:0.6">(434 KB)</span>
+        </a>
+
+        <div class="step">
+            <div class="num">1</div>
+            <div>
+                <h3>Open the DMG and drag Idle into Applications</h3>
+                <p>Double-click <code>Idle.dmg</code> to mount it. Drag <code>Idle.app</code> onto the Applications shortcut. Eject the DMG.</p>
+            </div>
+        </div>
+
+        <div class="gatekeeper">
+            <h3>About the "cannot be opened" warning</h3>
+            <p>Idle is currently distributed without an Apple Developer ID notarization (it costs $99/year — we'll add it once we have meaningful users). When you first try to launch, macOS will show a warning. <strong>Idle is open source — you can read every line at <a href="https://github.com/ashlr/idle">github.com/ashlr/idle</a> before running.</strong></p>
+            <p>To bypass the warning, follow steps 2-3 below.</p>
+        </div>
+
+        <div class="step">
+            <div class="num">2</div>
+            <div>
+                <h3>Right-click Idle.app → Open</h3>
+                <p>In Finder, navigate to <code>/Applications</code>. <strong>Right-click</strong> (or Control-click) <code>Idle.app</code> and choose <strong>Open</strong> from the menu. macOS will show the warning with an "Open" button this time.</p>
+                <p>Click <strong>Open</strong>. macOS remembers this choice; future launches happen normally.</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="num">3</div>
+            <div>
+                <h3>Or use Terminal (faster)</h3>
+                <p>If the right-click trick doesn't work (sometimes happens on macOS 14+), open Terminal and run:</p>
+                <pre>xattr -d com.apple.quarantine /Applications/Idle.app</pre>
+                <p>This removes the "downloaded from internet" flag. Then double-click <code>Idle.app</code> to launch normally.</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="num">4</div>
+            <div>
+                <h3>Look for the leaf in your menu bar</h3>
+                <p>Idle is a menu-bar app (no Dock icon). After launch, you'll see <strong>Idle</strong> in the top-right of your screen. Click it to open the popover. The welcome wizard auto-opens on first launch with pre-flight checks and earnings expectations.</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="num">5</div>
+            <div>
+                <h3>Toggle "Launch at login"</h3>
+                <p>In the popover footer, flip the <strong>Launch at login</strong> switch. macOS will pop a permission dialog the first time — approve it. Idle now starts every time you log in.</p>
+            </div>
+        </div>
+
+        <h2>If you have Homebrew</h2>
+        <p>Power users can skip the Gatekeeper dance entirely:</p>
+        <pre>brew tap ashlr/idle https://github.com/ashlr/idle
+brew install --cask idle
+open /Applications/Idle.app</pre>
+        <p>Homebrew bypasses Gatekeeper because brew itself is trusted by macOS.</p>
+
+        <h2>Uninstalling</h2>
+        <pre>defaults delete ai.ashlr.idle
+rm -rf /Applications/Idle.app
+launchctl unload ~/Library/LaunchAgents/com.user.keepawake.plist 2>/dev/null
+rm -f ~/Library/LaunchAgents/com.user.keepawake.plist</pre>
+    </article>
+
+    <footer>
+        <div>© Ashlr · Idle is open source.</div>
+        <ul>
+            <li><a href="/privacy">Privacy</a></li>
+            <li><a href="/terms">Terms</a></li>
+            <li><a href="https://github.com/ashlr/idle">GitHub</a></li>
+        </ul>
+    </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "_comment": "Idle remote config. Updated without rebuilding the app — replace any null with your actual referral codes from each DePIN service's dashboard. Cached for 5 minutes by Vercel.",
+  "version": "0.4.0",
+  "minClientVersion": "0.2.0",
+  "downloadURL": "https://github.com/ashlr/idle/releases/latest/download/Idle.dmg",
+  "referrals": {
+    "pawns": null,
+    "grass": null,
+    "honeygain": null,
+    "earnApp": null,
+    "mystNodes": null,
+    "nodepay": null
+  },
+  "announcements": []
+}
