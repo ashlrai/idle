@@ -27,8 +27,9 @@ struct DePinApp: Identifiable, Hashable {
 
 enum AppRegistry {
     /// The operator's referral code for each supported DePIN app.
-    /// These are filled in after the operator signs up. Until then, signup
-    /// links go to the bare service and no referral commission is earned.
+    /// Each service uses a different URL format — see the per-app builders below.
+    /// Default is nil (uses the bare signup URL with no commission to operator);
+    /// `RemoteConfig` overrides these from idle.ashlr.ai/config.json on launch.
     struct ReferralCodes {
         var pawns: String?
         var grass: String?
@@ -54,7 +55,7 @@ enum AppRegistry {
                 name: "Pawns",
                 bundleIdentifier: "com.pawns.desktop",
                 appPath: "/Applications/Pawns app.app",
-                signupURL: signup("https://dashboard.pawns.app/register", refParam: "ref", refCode: referrals.pawns),
+                signupURL: pawnsSignupURL(),
                 dashboardURL: URL(string: "https://dashboard.pawns.app/")!,
                 downloadURL: URL(string: "https://cdn.pawns.app/download/app/releases/darwin64/latest/Pawns.app.dmg"),
                 directDownloadURL: URL(string: "https://cdn.pawns.app/download/app/releases/darwin64/latest/Pawns.app.dmg"),
@@ -66,7 +67,7 @@ enum AppRegistry {
                 name: "Grass",
                 bundleIdentifier: "io.getgrass.desktop",
                 appPath: nil,
-                signupURL: signup("https://app.grass.io/register", refParam: "ref", refCode: referrals.grass),
+                signupURL: grassSignupURL(),
                 dashboardURL: URL(string: "https://app.grass.io/dashboard")!,
                 downloadURL: URL(string: "https://app.grass.io/dashboard/download/item/desktop"),
                 directDownloadURL: nil,
@@ -78,7 +79,7 @@ enum AppRegistry {
                 name: "Honeygain",
                 bundleIdentifier: "com.honeygain.honeygain",
                 appPath: "/Applications/Honeygain.app",
-                signupURL: signup("https://dashboard.honeygain.com/sign-up", refParam: "code", refCode: referrals.honeygain),
+                signupURL: honeygainSignupURL(),
                 dashboardURL: URL(string: "https://dashboard.honeygain.com/")!,
                 downloadURL: URL(string: "https://dashboard.honeygain.com/get-app"),
                 directDownloadURL: nil,
@@ -90,7 +91,7 @@ enum AppRegistry {
                 name: "EarnApp",
                 bundleIdentifier: "com.earnapp.app",
                 appPath: "/Applications/EarnApp.app",
-                signupURL: signup("https://earnapp.com/dashboard/signup", refParam: "referral", refCode: referrals.earnApp),
+                signupURL: earnAppSignupURL(),
                 dashboardURL: URL(string: "https://earnapp.com/dashboard")!,
                 downloadURL: URL(string: "https://earnapp.com/dashboard"),
                 directDownloadURL: nil,
@@ -102,7 +103,7 @@ enum AppRegistry {
                 name: "MystNodes",
                 bundleIdentifier: "network.mysterium.launcher",
                 appPath: "/Applications/MystNodes Launcher.app",
-                signupURL: signup("https://my.mystnodes.com/registration", refParam: "ref", refCode: referrals.mystNodes),
+                signupURL: mystNodesSignupURL(),
                 dashboardURL: URL(string: "https://my.mystnodes.com/")!,
                 downloadURL: URL(string: "https://github.com/mysteriumnetwork/myst-launcher-release/releases/latest/download/MystNodesLauncher.dmg"),
                 directDownloadURL: URL(string: "https://github.com/mysteriumnetwork/myst-launcher-release/releases/latest/download/MystNodesLauncher.dmg"),
@@ -114,7 +115,7 @@ enum AppRegistry {
                 name: "Nodepay",
                 bundleIdentifier: nil,
                 appPath: nil,
-                signupURL: signup("https://app.nodepay.ai/register", refParam: "ref", refCode: referrals.nodepay),
+                signupURL: nodepaySignupURL(),
                 dashboardURL: URL(string: "https://app.nodepay.ai/dashboard")!,
                 downloadURL: URL(string: "https://chromewebstore.google.com/detail/nodepay-extension/lgmpfmgeabnnlemejacfljbmonaomfmm"),
                 directDownloadURL: nil,
@@ -124,13 +125,60 @@ enum AppRegistry {
         ]
     }
 
-    private static func signup(_ base: String, refParam: String, refCode: String?) -> URL {
-        guard let code = refCode, var components = URLComponents(string: base) else {
-            return URL(string: base)!
+    // MARK: - Per-service signup URL builders
+    //
+    // Each DePIN service uses a different referral URL format. We can't share
+    // one templated builder because some are query-param style and some are
+    // path-based. Centralized here so RemoteConfig can change the codes
+    // without touching the URL shapes.
+
+    private static func pawnsSignupURL() -> URL {
+        // Pawns referral param is `r`, lands on the marketing site which then
+        // redirects into dashboard.pawns.app/register with the referral cookie set.
+        if let code = referrals.pawns {
+            return URL(string: "https://pawns.app/?r=\(code)")!
         }
-        var items = components.queryItems ?? []
-        items.append(URLQueryItem(name: refParam, value: code))
-        components.queryItems = items
-        return components.url ?? URL(string: base)!
+        return URL(string: "https://dashboard.pawns.app/register")!
+    }
+
+    private static func grassSignupURL() -> URL {
+        // Grass uses ?referralCode= (not ?ref=).
+        if let code = referrals.grass {
+            return URL(string: "https://app.grass.io/register?referralCode=\(code)")!
+        }
+        return URL(string: "https://app.grass.io/register")!
+    }
+
+    private static func honeygainSignupURL() -> URL {
+        // Honeygain referrals are path-based on a separate join. subdomain.
+        if let code = referrals.honeygain {
+            return URL(string: "https://join.honeygain.com/\(code)")!
+        }
+        return URL(string: "https://dashboard.honeygain.com/sign-up")!
+    }
+
+    private static func earnAppSignupURL() -> URL {
+        // EarnApp referrals are path-based on /i/<code>.
+        if let code = referrals.earnApp {
+            return URL(string: "https://earnapp.com/i/\(code)")!
+        }
+        return URL(string: "https://earnapp.com/dashboard/signup")!
+    }
+
+    private static func mystNodesSignupURL() -> URL {
+        // MystNodes uses ?referral_code= and the .co alias domain that
+        // redirects to my.mystnodes.com/registration with the cookie set.
+        if let code = referrals.mystNodes {
+            return URL(string: "https://mystnodes.co/?referral_code=\(code)")!
+        }
+        return URL(string: "https://my.mystnodes.com/registration")!
+    }
+
+    private static func nodepaySignupURL() -> URL {
+        // Nodepay referrals are path-based on /ref/<code>.
+        if let code = referrals.nodepay {
+            return URL(string: "https://nodepay.ai/ref/\(code)")!
+        }
+        return URL(string: "https://app.nodepay.ai/register")!
     }
 }

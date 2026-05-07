@@ -80,7 +80,15 @@ final class Preflight: ObservableObject {
     }
 
     private func vpnCheck() -> Check {
-        // VPN tunnels typically appear as utunN, ipsecN, or pppN interfaces.
+        // VPN tunnels appear as utun*/ipsec*/ppp* interfaces — but on a normal
+        // Mac, utun* interfaces are also used for iCloud Continuity, AirDrop,
+        // Personal Hotspot, and Apple system networking. They show up as
+        // UP+RUNNING but carry no real IPv4 traffic.
+        //
+        // Real-VPN heuristic: a tunnel interface that ALSO has a non-link-local
+        // IPv4 address bound to it. macOS's internal utuns get IPv6 only or
+        // link-local IPv4. A real VPN client (Tailscale, ProtonVPN, NordVPN,
+        // corporate IPsec, etc.) assigns a routable IPv4 to its interface.
         var ifaddrs: UnsafeMutablePointer<ifaddrs>?
         guard getifaddrs(&ifaddrs) == 0, let first = ifaddrs else {
             return Check(id: "vpn", title: "Network status unavailable", detail: "Couldn't enumerate interfaces.", severity: .warn)
@@ -88,15 +96,26 @@ final class Preflight: ObservableObject {
         defer { freeifaddrs(ifaddrs) }
 
         var hasVPN = false
+        var vpnInterface = ""
         var ptr = first
         while true {
             let name = String(cString: ptr.pointee.ifa_name)
-            if name.hasPrefix("utun") || name.hasPrefix("ipsec") || name.hasPrefix("ppp") {
-                // Active = has flags up + running.
-                let flags = ptr.pointee.ifa_flags
-                if (flags & UInt32(IFF_UP)) != 0 && (flags & UInt32(IFF_RUNNING)) != 0 {
-                    hasVPN = true
-                    break
+            let isTunnel = name.hasPrefix("utun") || name.hasPrefix("ipsec") || name.hasPrefix("ppp")
+            if isTunnel,
+               let addr = ptr.pointee.ifa_addr,
+               addr.pointee.sa_family == sa_family_t(AF_INET) {
+                // Tunnel has a real IPv4 address — almost certainly a VPN.
+                var hostBuf = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                if getnameinfo(addr, socklen_t(addr.pointee.sa_len),
+                               &hostBuf, socklen_t(hostBuf.count),
+                               nil, 0, NI_NUMERICHOST) == 0 {
+                    let ipString = String(cString: hostBuf)
+                    // Skip link-local (169.254.x.x) which can appear briefly.
+                    if !ipString.hasPrefix("169.254.") {
+                        hasVPN = true
+                        vpnInterface = "\(name) (\(ipString))"
+                        break
+                    }
                 }
             }
             guard let next = ptr.pointee.ifa_next else { break }
@@ -104,7 +123,7 @@ final class Preflight: ObservableObject {
         }
 
         if hasVPN {
-            return Check(id: "vpn", title: "VPN detected", detail: "Disable VPN before running DePIN apps. They ban datacenter/VPN IPs instantly.", severity: .fail)
+            return Check(id: "vpn", title: "VPN active on \(vpnInterface)", detail: "Disable VPN before running DePIN apps. They ban datacenter/VPN IPs instantly.", severity: .fail)
         }
         return Check(id: "vpn", title: "No VPN active", detail: "Good. DePIN apps require a residential IP.", severity: .ok)
     }
