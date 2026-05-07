@@ -8,6 +8,9 @@ struct DePinApp: Identifiable, Hashable {
     let signupURL: URL
     let dashboardURL: URL
     let downloadURL: URL?
+    /// Direct DMG/PKG URL for one-click install. nil for apps whose installer
+    /// is gated behind a logged-in dashboard (Honeygain, EarnApp).
+    let directDownloadURL: URL?
     let kind: Kind
     let payoutKind: PayoutKind
 
@@ -54,6 +57,7 @@ enum AppRegistry {
                 signupURL: signup("https://dashboard.pawns.app/register", refParam: "ref", refCode: referrals.pawns),
                 dashboardURL: URL(string: "https://dashboard.pawns.app/")!,
                 downloadURL: URL(string: "https://cdn.pawns.app/download/app/releases/darwin64/latest/Pawns.app.dmg"),
+                directDownloadURL: URL(string: "https://cdn.pawns.app/download/app/releases/darwin64/latest/Pawns.app.dmg"),
                 kind: .nativeApp,
                 payoutKind: .usd
             ),
@@ -65,6 +69,7 @@ enum AppRegistry {
                 signupURL: signup("https://app.grass.io/register", refParam: "ref", refCode: referrals.grass),
                 dashboardURL: URL(string: "https://app.grass.io/dashboard")!,
                 downloadURL: URL(string: "https://app.grass.io/dashboard/download/item/desktop"),
+                directDownloadURL: nil,
                 kind: .nativeApp,
                 payoutKind: .token(symbol: "GRASS")
             ),
@@ -76,6 +81,7 @@ enum AppRegistry {
                 signupURL: signup("https://dashboard.honeygain.com/sign-up", refParam: "code", refCode: referrals.honeygain),
                 dashboardURL: URL(string: "https://dashboard.honeygain.com/")!,
                 downloadURL: URL(string: "https://dashboard.honeygain.com/get-app"),
+                directDownloadURL: nil,
                 kind: .nativeApp,
                 payoutKind: .usd
             ),
@@ -87,6 +93,7 @@ enum AppRegistry {
                 signupURL: signup("https://earnapp.com/dashboard/signup", refParam: "referral", refCode: referrals.earnApp),
                 dashboardURL: URL(string: "https://earnapp.com/dashboard")!,
                 downloadURL: URL(string: "https://earnapp.com/dashboard"),
+                directDownloadURL: nil,
                 kind: .nativeApp,
                 payoutKind: .usd
             ),
@@ -98,6 +105,7 @@ enum AppRegistry {
                 signupURL: signup("https://my.mystnodes.com/registration", refParam: "ref", refCode: referrals.mystNodes),
                 dashboardURL: URL(string: "https://my.mystnodes.com/")!,
                 downloadURL: URL(string: "https://github.com/mysteriumnetwork/myst-launcher-release/releases/latest/download/MystNodesLauncher.dmg"),
+                directDownloadURL: URL(string: "https://github.com/mysteriumnetwork/myst-launcher-release/releases/latest/download/MystNodesLauncher.dmg"),
                 kind: .nativeApp,
                 payoutKind: .token(symbol: "MYST")
             ),
@@ -109,6 +117,7 @@ enum AppRegistry {
                 signupURL: signup("https://app.nodepay.ai/register", refParam: "ref", refCode: referrals.nodepay),
                 dashboardURL: URL(string: "https://app.nodepay.ai/dashboard")!,
                 downloadURL: URL(string: "https://chromewebstore.google.com/detail/nodepay-extension/lgmpfmgeabnnlemejacfljbmonaomfmm"),
+                directDownloadURL: nil,
                 kind: .chromeExtension,
                 payoutKind: .token(symbol: "NODE")
             )

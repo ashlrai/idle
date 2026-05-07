@@ -25,6 +25,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let clipboard = Clipboard()
     private let preflight = Preflight()
     private let remoteConfig = RemoteConfig()
+    private let installer = Installer()
+    private let earnings = Earnings()
     private var welcomeWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -92,11 +94,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.center()
         window.isReleasedWhenClosed = false
         window.contentViewController = NSHostingController(
-            rootView: DashboardsView(lifecycle: lifecycle)
+            rootView: DashboardsView(lifecycle: lifecycle, earnings: earnings)
         )
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         dashboardWindow = window
+        earnings.startPolling()
     }
 
     func showWelcome() {
@@ -150,7 +153,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.center()
         window.isReleasedWhenClosed = false
         window.contentViewController = NSHostingController(
-            rootView: OnboardingView(vault: vault, clipboard: clipboard)
+            rootView: OnboardingView(vault: vault, clipboard: clipboard, installer: installer, lifecycle: lifecycle)
         )
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)

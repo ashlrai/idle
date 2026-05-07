@@ -6,6 +6,8 @@ import SwiftUI
 struct OnboardingView: View {
     @ObservedObject var vault: Vault
     @ObservedObject var clipboard: Clipboard
+    @ObservedObject var installer: Installer
+    @ObservedObject var lifecycle: Lifecycle
     @State private var selection: String = AppRegistry.all.first?.id ?? "pawns"
 
     var body: some View {
@@ -36,7 +38,23 @@ struct OnboardingView: View {
 
             Spacer()
 
-            Text("\(vault.completed.count) of \(AppRegistry.all.count) signed up")
+            Button {
+                Task { await installer.installAll() }
+            } label: {
+                if installer.isBusy {
+                    HStack(spacing: 6) {
+                        ProgressView().controlSize(.small)
+                        Text("Installing…")
+                    }
+                } else {
+                    Label("Install all (auto)", systemImage: "arrow.down.app")
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+            .disabled(installer.isBusy)
+
+            Text("\(vault.completed.count) of \(AppRegistry.all.count)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -63,8 +81,14 @@ struct OnboardingView: View {
     @ViewBuilder
     private var detail: some View {
         if let app = AppRegistry.all.first(where: { $0.id == selection }) {
-            OnboardingStepView(app: app, vault: vault, clipboard: clipboard)
-                .id(app.id)
+            OnboardingStepView(
+                app: app,
+                vault: vault,
+                clipboard: clipboard,
+                installer: installer,
+                lifecycle: lifecycle
+            )
+            .id(app.id)
         } else {
             Text("Select an app")
                 .foregroundStyle(.secondary)
@@ -96,6 +120,8 @@ struct OnboardingStepView: View {
     let app: DePinApp
     @ObservedObject var vault: Vault
     @ObservedObject var clipboard: Clipboard
+    @ObservedObject var installer: Installer
+    @ObservedObject var lifecycle: Lifecycle
 
     var body: some View {
         VStack(spacing: 0) {
@@ -171,40 +197,153 @@ struct OnboardingStepView: View {
             }
             Spacer()
             Button("Prefill credentials") { runPrefill() }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.bordered)
                 .disabled(vault.email.isEmpty)
         }
         .padding(12)
     }
 
     private var stepFooter: some View {
-        HStack(spacing: 12) {
-            Text("Password for \(app.name): ")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Text(vault.password(for: app.id))
-                .font(.caption.monospaced())
-                .textSelection(.enabled)
-            Button {
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(vault.password(for: app.id), forType: .string)
-            } label: {
-                Image(systemName: "doc.on.doc")
-            }
-            .buttonStyle(.borderless)
+        VStack(alignment: .leading, spacing: 8) {
+            installRow
+            HStack(spacing: 12) {
+                Text("Password: ")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(vault.password(for: app.id))
+                    .font(.caption.monospaced())
+                    .textSelection(.enabled)
+                Button {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(vault.password(for: app.id), forType: .string)
+                } label: {
+                    Image(systemName: "doc.on.doc")
+                }
+                .buttonStyle(.borderless)
 
-            Spacer()
+                Spacer()
 
-            Toggle(isOn: Binding(
-                get: { vault.isCompleted(app.id) },
-                set: { vault.setCompleted(app.id, $0) }
-            )) {
-                Text("Mark complete").font(.caption)
+                Toggle(isOn: Binding(
+                    get: { vault.isCompleted(app.id) },
+                    set: { vault.setCompleted(app.id, $0) }
+                )) {
+                    Text("Mark complete").font(.caption)
+                }
+                .toggleStyle(.switch)
+                .controlSize(.small)
             }
-            .toggleStyle(.switch)
-            .controlSize(.small)
         }
         .padding(12)
+    }
+
+    /// Row that surfaces install / launch state. Three branches:
+    /// 1. Already installed → show Launch button
+    /// 2. Not installed but we have a direct download URL → show Install button + progress
+    /// 3. Not installed and no direct URL (Honeygain, EarnApp, Grass, Nodepay) →
+    ///    show explanation + open-dashboard button.
+    @ViewBuilder
+    private var installRow: some View {
+        let status = lifecycle.statuses[app.id] ?? .notInstalled
+        if app.kind == .chromeExtension {
+            HStack(spacing: 8) {
+                Image(systemName: "puzzlepiece.extension")
+                    .foregroundStyle(.secondary)
+                Text("Chrome extension — opens the Web Store; Chrome blocks scripted installs.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Open Web Store") {
+                    if let url = app.downloadURL { NSWorkspace.shared.open(url) }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
+        } else if status == .running {
+            HStack(spacing: 8) {
+                Image(systemName: "circle.fill").foregroundStyle(.green).font(.caption)
+                Text("Running").font(.caption.weight(.medium))
+                Spacer()
+                Button("Quit") { lifecycle.quit(app) }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+            }
+        } else if status == .installedNotRunning {
+            HStack(spacing: 8) {
+                Image(systemName: "circle.fill").foregroundStyle(.orange).font(.caption)
+                Text("Installed").font(.caption.weight(.medium))
+                Spacer()
+                Button("Launch") { lifecycle.launch(app) }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+            }
+        } else {
+            switch installer.states[app.id] {
+            case .downloading(let progress):
+                HStack(spacing: 10) {
+                    ProgressView(value: progress).controlSize(.small)
+                    Text("\(Int(progress * 100))%").font(.caption.monospaced())
+                }
+            case .mounting:
+                progressLabel("Mounting DMG…")
+            case .installing:
+                progressLabel("Installing…")
+            case .ejecting:
+                progressLabel("Ejecting…")
+            case .done:
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                    Text("Installed").font(.caption.weight(.medium))
+                    Spacer()
+                    Button("Launch") {
+                        lifecycle.refresh()
+                        lifecycle.launch(app)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                }
+            case .failed(let reason):
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+                    Text(reason).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                    Spacer()
+                    Button("Retry") { Task { await installer.install(app) } }
+                        .buttonStyle(.bordered).controlSize(.small)
+                }
+            case .idle, .none:
+                if app.directDownloadURL != nil {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.down.app").foregroundStyle(.secondary)
+                        Text("Not installed").font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        Button {
+                            Task { await installer.install(app) }
+                        } label: {
+                            Label("Install", systemImage: "arrow.down")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                    }
+                } else {
+                    HStack(spacing: 8) {
+                        Image(systemName: "info.circle").foregroundStyle(.secondary)
+                        Text("Installer is dashboard-gated — log in then click Download.")
+                            .font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Open dashboard") {
+                            if let url = app.downloadURL { NSWorkspace.shared.open(url) }
+                        }
+                        .buttonStyle(.bordered).controlSize(.small)
+                    }
+                }
+            }
+        }
+    }
+
+    private func progressLabel(_ text: String) -> some View {
+        HStack(spacing: 8) {
+            ProgressView().controlSize(.small)
+            Text(text).font(.caption).foregroundStyle(.secondary)
+        }
     }
 
     private func runPrefill() {

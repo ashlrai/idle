@@ -7,21 +7,27 @@ import WebKit
 /// state survive when the user clicks between apps.
 struct DashboardsView: View {
     @ObservedObject var lifecycle: Lifecycle
+    @ObservedObject var earnings: Earnings
     @State private var selection: String
 
-    init(lifecycle: Lifecycle) {
+    init(lifecycle: Lifecycle, earnings: Earnings) {
         self.lifecycle = lifecycle
+        self.earnings = earnings
         _selection = State(initialValue: AppRegistry.all.first?.id ?? "pawns")
     }
 
     var body: some View {
-        NavigationSplitView {
-            sidebar
-        } detail: {
-            detail
+        VStack(spacing: 0) {
+            EarningsBar(earnings: earnings)
+            Divider()
+            NavigationSplitView {
+                sidebar
+            } detail: {
+                detail
+            }
+            .navigationSplitViewStyle(.balanced)
         }
-        .navigationSplitViewStyle(.balanced)
-        .frame(minWidth: 900, minHeight: 600)
+        .frame(minWidth: 900, minHeight: 640)
     }
 
     private var sidebar: some View {
