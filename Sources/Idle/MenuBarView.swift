@@ -6,6 +6,7 @@ struct MenuBarView: View {
     @ObservedObject var launchAtLogin: LaunchAtLogin
     let openDashboards: () -> Void
     let openOnboarding: () -> Void
+    let openEarnings: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
@@ -21,7 +22,9 @@ struct MenuBarView: View {
             }
             Divider()
             HStack(spacing: 0) {
-                MenuBarLink(systemImage: "wand.and.stars", title: "Setup wizard", action: openOnboarding)
+                MenuBarLink(systemImage: "wand.and.stars", title: "Setup", action: openOnboarding)
+                Divider().frame(height: 24)
+                MenuBarLink(systemImage: "chart.line.uptrend.xyaxis", title: "Earnings", action: openEarnings)
                 Divider().frame(height: 24)
                 MenuBarLink(systemImage: "square.grid.2x2", title: "Dashboards", action: openDashboards)
             }

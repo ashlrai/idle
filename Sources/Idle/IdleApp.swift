@@ -27,7 +27,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let remoteConfig = RemoteConfig()
     private let installer = Installer()
     private let earnings = Earnings()
+    private let earningsHistory = EarningsHistory()
+    private let prices = PriceFetcher()
     private var welcomeWindow: NSWindow?
+    private var earningsWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -46,12 +49,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 caffeinate: caffeinate,
                 launchAtLogin: launchAtLogin,
                 openDashboards: { [weak self] in self?.showDashboards() },
-                openOnboarding: { [weak self] in self?.showOnboarding() }
+                openOnboarding: { [weak self] in self?.showOnboarding() },
+                openEarnings: { [weak self] in self?.showEarnings() }
             )
         )
 
         lifecycle.startPolling()
         clipboard.startPolling()
+        earnings.history = earningsHistory
+        prices.startPolling()
         Task { await remoteConfig.refresh() }
 
         if !UserDefaults.hasCompletedWelcome {
@@ -132,6 +138,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         welcomeWindow = window
+    }
+
+    func showEarnings() {
+        popover.performClose(nil)
+
+        if let window = earningsWindow {
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 1000, height: 760),
+            styleMask: [.titled, .closable, .resizable, .miniaturizable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = "Idle Earnings"
+        window.center()
+        window.isReleasedWhenClosed = false
+        window.contentViewController = NSHostingController(
+            rootView: EarningsDashboardView(
+                earnings: earnings,
+                history: earningsHistory,
+                prices: prices
+            )
+        )
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        earningsWindow = window
+        // Make sure earnings polling is running so the dashboard isn't empty.
+        earnings.startPolling()
     }
 
     func showOnboarding() {

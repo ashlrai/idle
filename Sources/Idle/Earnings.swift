@@ -20,6 +20,9 @@ final class Earnings: ObservableObject {
 
     @Published private(set) var readings: [String: Reading] = [:]
     private var timer: Timer?
+    /// Optional history sink. When set, every refreshAll() snapshot also
+    /// gets recorded for the trend chart.
+    weak var history: EarningsHistory?
 
     func startPolling() {
         timer?.invalidate()
@@ -38,6 +41,7 @@ final class Earnings: ObservableObject {
         for app in AppRegistry.all {
             await refresh(app)
         }
+        history?.record(readings)
     }
 
     func refresh(_ app: DePinApp) async {
