@@ -1,46 +1,47 @@
 #!/bin/zsh
-# Downloads and installs cpuminer-verus for Apple Silicon, ready for Idle to launch.
-# Source: https://github.com/monkins1010/ccminer (the actively maintained ARM64 fork).
-# License: GPLv3 — we don't bundle the binary inside Idle's MIT-licensed app
-# bundle for that reason. This script lives in Scripts/, runs once, installs to
-# ~/Library/Application Support/Idle/miner/cpuminer.
+# Downloads ccminer (Apple Silicon arm64 build by Mr-Bossman) for Verus CPU
+# mining and installs it where Idle's Mining.swift expects to find it.
+#
+# Source: https://github.com/Mr-Bossman/ccminer (open source, derivative of
+# tpruvot/ccminer, ARM64-optimized for Apple Silicon, supports VerusHash 2.2).
+# Single Mach-O binary, ~3.4 MB. We don't bundle it inside Idle's MIT-licensed
+# .app to keep the licensing tree clean (ccminer is GPL).
 
 set -euo pipefail
 
 DEST_DIR="$HOME/Library/Application Support/Idle/miner"
 DEST_BIN="$DEST_DIR/cpuminer"
-BUILD_DIR="$(mktemp -d)"
+SOURCE_URL="https://github.com/Mr-Bossman/ccminer/releases/download/7db3a94/ccminer"
 
 echo "==> Installing Verus miner for Apple Silicon"
 echo "    Destination: $DEST_BIN"
 mkdir -p "$DEST_DIR"
 
-if ! command -v brew >/dev/null 2>&1; then
-    echo "Homebrew is required to build cpuminer-verus. Install it from brew.sh first." >&2
-    exit 1
+echo "==> Downloading ccminer (Mr-Bossman build)"
+curl -fL --progress-bar -o "$DEST_BIN" "$SOURCE_URL"
+chmod +x "$DEST_BIN"
+
+# Verify the binary is the right architecture.
+if file "$DEST_BIN" | grep -q "Mach-O.*arm64"; then
+    echo "==> Verified: arm64 Mach-O binary"
+else
+    echo "==> WARNING: binary is not arm64 — check $DEST_BIN" >&2
 fi
 
-echo "==> Installing build dependencies (curl, automake, openssl)"
-brew install autoconf automake libtool openssl@3 curl pkg-config 2>/dev/null || true
+# Quick sanity check: does it accept the --help flag?
+if "$DEST_BIN" --help 2>&1 | head -1 | grep -qi "ccminer\|usage"; then
+    echo "==> Binary runs"
+else
+    echo "==> NOTE: binary may not run on your macOS version. Check Gatekeeper:"
+    echo "         xattr -d com.apple.quarantine \"$DEST_BIN\""
+fi
 
-echo "==> Cloning cpuminer-verus"
-cd "$BUILD_DIR"
-git clone --depth 1 https://github.com/monkins1010/ccminer.git 2>&1 | tail -3
-cd ccminer
-
-echo "==> Building (this takes ~3 min on an M-series Mac)"
-./autogen.sh >/dev/null 2>&1
-./configure CFLAGS="-O3 -march=armv8-a+crypto+sha2 -mtune=native" \
-    --with-crypto=$(brew --prefix openssl@3) >/dev/null 2>&1
-make -j$(sysctl -n hw.ncpu) 2>&1 | tail -3
-
-echo "==> Installing binary"
-cp cpuminer "$DEST_BIN"
-chmod +x "$DEST_BIN"
-rm -rf "$BUILD_DIR"
-
-echo "==> Done. Open Idle, toggle Verus mining ON in the menu bar popover."
-echo "    Make sure to set your VRSC payout address in Idle Settings first."
 echo
-echo "Want a VRSC address? Install Verus Desktop from veruscoin.io or use"
-echo "an exchange that supports VRSC (KuCoin, Bittrex)."
+echo "==> Done. Next steps:"
+echo "    1. Get a VRSC payout address (Verus Desktop wallet or KuCoin/Bittrex deposit)"
+echo "    2. Open Idle → set the address in Mining settings (or paste into UserDefaults:"
+echo "         defaults write ai.ashlr.idle idle.mining.address -string 'YOUR_VRSC_ADDR')"
+echo "    3. Click 'Start' on the Verus mining row in the Idle popover"
+echo
+echo "Pool: stratum+tcp://na.luckpool.net:3956 (default in Idle)"
+echo "Estimated income on M-series Air at 24/7 plug-in: \$30-90 / month"

@@ -29,15 +29,19 @@ final class Mining: ObservableObject {
     }
 
     @Published private(set) var state: State = .notInstalled
-    /// Pool address — community Verus pool, ~3% fee, no registration needed.
-    /// Override via Settings if the user prefers solo or a different pool.
-    @Published var pool: String = "stratum+tcp://pool.verus.io:9999"
-    /// Pays out to this VRSC address. Set to operator's address for default;
-    /// users can override in Settings to point at their own.
-    @Published var address: String = ""
+    /// Pool address — LuckPool (Verus's largest pool, ~1% fee).
+    /// CPU port is 3956. Override via UserDefaults if the user prefers a
+    /// different pool.
+    @Published var pool: String = "stratum+tcp://na.luckpool.net:3956"
+    /// Pays out to this VRSC address. Persisted in UserDefaults so it survives
+    /// relaunch. Idle never holds the wallet's seed phrase — the user provides
+    /// only the public R-address.
+    @Published var address: String {
+        didSet { UserDefaults.standard.set(address, forKey: "idle.mining.address") }
+    }
     /// Cap thread count at this fraction of available cores. 0.5 = half on
-    /// battery, 0.75 default on AC.
-    @Published var threadFraction: Double = 0.5
+    /// battery, 0.75 default on AC. Adjustable from Settings later.
+    @Published var threadFraction: Double = 0.75
 
     private var process: Process?
     private var hashRateTimer: Timer?
@@ -51,6 +55,7 @@ final class Mining: ObservableObject {
     }()
 
     init() {
+        self.address = UserDefaults.standard.string(forKey: "idle.mining.address") ?? ""
         refresh()
     }
 
@@ -91,14 +96,17 @@ final class Mining: ObservableObject {
         let cores = ProcessInfo.processInfo.activeProcessorCount
         let threads = max(1, Int(Double(cores) * threadFraction))
 
+        let rigName = (Host.current().localizedName ?? "mac")
+            .replacingOccurrences(of: " ", with: "-")
+            .replacingOccurrences(of: "'", with: "")
         let p = Process()
         p.executableURL = Self.binaryURL
         p.arguments = [
-            "-a", "verushash",
-            "-o", pool,
-            "-u", "\(address).idle-\(Host.current().localizedName ?? "mac")",
-            "-p", "x",
-            "-t", String(threads)
+            "-a", "verus",                          // VerusHash 2.2
+            "-o", pool,                             // stratum+tcp://na.luckpool.net:3956
+            "-u", "\(address).\(rigName)",          // VRSC address.rigname
+            "-p", "d=6",                            // pool difficulty hint
+            "-t", String(threads)                   // thread count
         ]
         let outPipe = Pipe()
         p.standardOutput = outPipe
