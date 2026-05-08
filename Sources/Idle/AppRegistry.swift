@@ -57,7 +57,7 @@ enum AppRegistry {
             DePinApp(
                 id: "pawns",
                 name: "Pawns",
-                bundleIdentifier: "com.pawns.desktop",
+                bundleIdentifier: "com.iproyal.pawns-desktop",
                 appPath: "/Applications/Pawns app.app",
                 signupURL: pawnsSignupURL(),
                 dashboardURL: URL(string: "https://dashboard.pawns.app/")!,
@@ -81,7 +81,7 @@ enum AppRegistry {
             DePinApp(
                 id: "honeygain",
                 name: "Honeygain",
-                bundleIdentifier: "com.honeygain.honeygain",
+                bundleIdentifier: "com.honeygain.Honeygain",
                 appPath: "/Applications/Honeygain.app",
                 signupURL: honeygainSignupURL(),
                 dashboardURL: URL(string: "https://dashboard.honeygain.com/")!,
@@ -93,7 +93,7 @@ enum AppRegistry {
             DePinApp(
                 id: "earnapp",
                 name: "EarnApp",
-                bundleIdentifier: "com.earnapp.app",
+                bundleIdentifier: "com.earnapp",
                 appPath: "/Applications/EarnApp.app",
                 signupURL: earnAppSignupURL(),
                 dashboardURL: URL(string: "https://earnapp.com/dashboard")!,
@@ -105,7 +105,7 @@ enum AppRegistry {
             DePinApp(
                 id: "mystnodes",
                 name: "MystNodes",
-                bundleIdentifier: "network.mysterium.launcher",
+                bundleIdentifier: "com.mystnodes",
                 appPath: "/Applications/MystNodes Launcher.app",
                 signupURL: mystNodesSignupURL(),
                 dashboardURL: URL(string: "https://my.mystnodes.com/")!,

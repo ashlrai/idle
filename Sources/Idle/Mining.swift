@@ -59,7 +59,32 @@ final class Mining: ObservableObject {
         refresh()
     }
 
+    /// Detect external verusd daemon (set up via fetch-bootstrap + verusd -daemon)
+    /// vs Idle's own ccminer subprocess. The verusd daemon does solo mining
+    /// while ccminer does pool mining; both count as "mining is happening".
+    private func externalVerusdRunning() -> Bool {
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/usr/bin/pgrep")
+        p.arguments = ["-x", "verusd"]
+        let pipe = Pipe()
+        p.standardOutput = pipe
+        p.standardError = Pipe()
+        do {
+            try p.run()
+            p.waitUntilExit()
+            return p.terminationStatus == 0
+        } catch {
+            return false
+        }
+    }
+
     func refresh() {
+        // External verusd takes precedence — if user set up solo mining via
+        // verus-cli, surface that as the running state regardless of ccminer.
+        if externalVerusdRunning() {
+            state = .running(threads: 6, hashRate: nil)
+            return
+        }
         if FileManager.default.isExecutableFile(atPath: Self.binaryURL.path) {
             if process != nil {
                 // already running — keep state
