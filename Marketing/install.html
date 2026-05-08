@@ -48,42 +48,48 @@
 
     <article>
         <h1>Installing Idle</h1>
-        <p class="updated">Takes 2-3 minutes. macOS 13 (Ventura) or later, Apple Silicon recommended.</p>
+        <p class="updated">macOS 13 (Ventura) or later, Apple Silicon required.</p>
 
+        <h2 style="margin-top: 16px;">Recommended: Homebrew (no Gatekeeper warning)</h2>
+        <p>If you have <a href="https://brew.sh">Homebrew</a>, this is the fastest, friction-free path. One command:</p>
+        <pre style="font-size: 16px; padding: 18px;">brew install --cask ashlrai/idle/idle</pre>
+        <p>That installs the latest <code>Idle.app</code> directly to <code>/Applications</code>. No warning dialog, no quarantine flag — Homebrew is trusted by macOS, so it skips Gatekeeper entirely. Then run:</p>
+        <pre>open /Applications/Idle.app</pre>
+        <p>Idle appears in your menu bar (top-right). The welcome wizard opens on first launch.</p>
+
+        <h2 style="margin-top: 36px;">Don't have Homebrew? Direct DMG download</h2>
         <a class="download-btn" href="https://github.com/ashlrai/idle/releases/latest/download/Idle.dmg">
-            ⬇︎ Download Idle.dmg <span style="opacity:0.6">(434 KB)</span>
+            ⬇︎ Download Idle.dmg <span style="opacity:0.6">(~750 KB)</span>
         </a>
+
+        <div class="gatekeeper">
+            <h3>About the "cannot be opened" warning</h3>
+            <p>Idle is currently distributed without an Apple Developer ID notarization (it's $99/year — we'll add it once we have meaningful traction). When you first try to launch the DMG version, macOS shows a warning. <strong>Idle is fully open source — you can read every line at <a href="https://github.com/ashlrai/idle">github.com/ashlrai/idle</a> before running.</strong> Or use the Homebrew path above to skip this entirely.</p>
+        </div>
 
         <div class="step">
             <div class="num">1</div>
             <div>
                 <h3>Open the DMG and drag Idle into Applications</h3>
-                <p>Double-click <code>Idle.dmg</code> to mount it. Drag <code>Idle.app</code> onto the Applications shortcut. Eject the DMG.</p>
+                <p>Double-click <code>Idle.dmg</code>, drag <code>Idle.app</code> onto the Applications shortcut, eject the DMG.</p>
             </div>
-        </div>
-
-        <div class="gatekeeper">
-            <h3>About the "cannot be opened" warning</h3>
-            <p>Idle is currently distributed without an Apple Developer ID notarization (it costs $99/year — we'll add it once we have meaningful users). When you first try to launch, macOS will show a warning. <strong>Idle is open source — you can read every line at <a href="https://github.com/ashlrai/idle">github.com/ashlrai/idle</a> before running.</strong></p>
-            <p>To bypass the warning, follow steps 2-3 below.</p>
         </div>
 
         <div class="step">
             <div class="num">2</div>
             <div>
-                <h3>Right-click Idle.app → Open</h3>
-                <p>In Finder, navigate to <code>/Applications</code>. <strong>Right-click</strong> (or Control-click) <code>Idle.app</code> and choose <strong>Open</strong> from the menu. macOS will show the warning with an "Open" button this time.</p>
-                <p>Click <strong>Open</strong>. macOS remembers this choice; future launches happen normally.</p>
+                <h3>Bypass Gatekeeper — Terminal one-liner (fastest)</h3>
+                <p>Open Terminal and paste:</p>
+                <pre>xattr -d com.apple.quarantine /Applications/Idle.app && open /Applications/Idle.app</pre>
+                <p>This removes the "downloaded from internet" flag and launches Idle. macOS remembers the decision.</p>
             </div>
         </div>
 
         <div class="step">
             <div class="num">3</div>
             <div>
-                <h3>Or use Terminal (faster)</h3>
-                <p>If the right-click trick doesn't work (sometimes happens on macOS 14+), open Terminal and run:</p>
-                <pre>xattr -d com.apple.quarantine /Applications/Idle.app</pre>
-                <p>This removes the "downloaded from internet" flag. Then double-click <code>Idle.app</code> to launch normally.</p>
+                <h3>Or right-click → Open</h3>
+                <p>Alternative for the Terminal-averse: in Finder, <strong>right-click</strong> (or Control-click) <code>/Applications/Idle.app</code>, choose <strong>Open</strong>, then click <strong>Open</strong> on the warning dialog. macOS remembers this choice.</p>
             </div>
         </div>
 
@@ -91,7 +97,7 @@
             <div class="num">4</div>
             <div>
                 <h3>Look for the leaf in your menu bar</h3>
-                <p>Idle is a menu-bar app (no Dock icon). After launch, you'll see <strong>Idle</strong> in the top-right of your screen. Click it to open the popover. The welcome wizard auto-opens on first launch with pre-flight checks and earnings expectations.</p>
+                <p>Idle is a menu-bar app (no Dock icon). After launch you'll see <strong>Idle</strong> in the top-right. Click it for the popover. The welcome wizard auto-opens on first launch with pre-flight checks.</p>
             </div>
         </div>
 
@@ -99,16 +105,9 @@
             <div class="num">5</div>
             <div>
                 <h3>Toggle "Launch at login"</h3>
-                <p>In the popover footer, flip the <strong>Launch at login</strong> switch. macOS will pop a permission dialog the first time — approve it. Idle now starts every time you log in.</p>
+                <p>In the popover footer, flip <strong>Launch at login</strong>. macOS will request permission once; approve it. Idle now starts every time you log in.</p>
             </div>
         </div>
-
-        <h2>If you have Homebrew</h2>
-        <p>Power users can skip the Gatekeeper dance entirely:</p>
-        <pre>brew tap ashlrai/idle https://github.com/ashlrai/idle
-brew install --cask idle
-open /Applications/Idle.app</pre>
-        <p>Homebrew bypasses Gatekeeper because brew itself is trusted by macOS.</p>
 
         <h2>Uninstalling</h2>
         <pre>defaults delete ai.ashlr.idle

@@ -19,14 +19,15 @@ six core bandwidth services, plus another $30–90 / month if you turn on
 Verus mining 24/7 on AC. See [`OPPORTUNITIES.md`](OPPORTUNITIES.md) for the
 honest breakdown.
 
-**One-line install** (requires Homebrew):
+**One-line install** (Homebrew, no Gatekeeper warnings):
 
 ```bash
-curl -L https://github.com/ashlrai/idle/releases/latest/download/Idle.dmg -o /tmp/Idle.dmg && hdiutil attach /tmp/Idle.dmg && cp -R /Volumes/Idle/Idle.app /Applications/ && hdiutil detach /Volumes/Idle && xattr -d com.apple.quarantine /Applications/Idle.app && open /Applications/Idle.app
+brew install --cask ashlrai/idle/idle
 ```
 
-Or [download the DMG](https://github.com/ashlrai/idle/releases/latest/download/Idle.dmg)
-and follow the [install walkthrough](https://idle.ashlr.ai/install).
+That auto-taps `ashlrai/homebrew-idle`, downloads the latest DMG, and installs `Idle.app` to `/Applications`. No quarantine flag, no warning dialog — Homebrew is trusted by macOS. Then `open /Applications/Idle.app` and look for the leaf in your menu bar.
+
+No Homebrew? [Download the DMG](https://github.com/ashlrai/idle/releases/latest/download/Idle.dmg) and follow the [install walkthrough](https://idle.ashlr.ai/install) — one Terminal command works around Gatekeeper since Idle isn't notarized yet (the $99/yr Apple Developer cert is on the post-traction roadmap).
 
 **Why not Hivello?** Hivello shut down its DePIN orchestrator Jan 30, 2026.
 It was Docker-based and heavy on a 16GB Mac. Idle is native Swift, runs as a

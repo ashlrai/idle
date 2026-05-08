@@ -99,8 +99,11 @@
     <header class="hero" id="download">
         <h1>Your Mac, idle, earning.</h1>
         <p class="lead">A native menu-bar app that turns spare bandwidth on your Mac into small, steady passive income — without the Docker stacks and dashboards-in-tabs of the alternatives.</p>
-        <a class="cta" href="https://github.com/ashlrai/idle/releases/latest/download/Idle.dmg">⬇︎ Download for macOS</a>
-        <div class="meta">macOS 13+ · Apple Silicon · Free · Open source</div>
+        <div style="background: rgba(52,211,153,0.07); border: 1px solid rgba(52,211,153,0.2); border-radius: 12px; padding: 18px; max-width: 540px; margin: 0 auto 20px; font-family: 'SF Mono', Menlo, monospace;">
+            brew install --cask ashlrai/idle/idle
+        </div>
+        <a class="cta" href="/install">Install instructions</a>
+        <div class="meta">macOS 13+ · Apple Silicon · Free · Open source · MIT licensed</div>
     </header>
 
     <div class="panels">
@@ -116,14 +119,16 @@
 
     <section id="features">
         <h2>What it does</h2>
-        <p class="tag">Six DePIN services in one menu-bar app.</p>
+        <p class="tag">Eight DePIN services + Verus mining + manual earnings tracker, in one menu-bar app.</p>
         <div class="features">
             <div class="feature"><h4>Pre-flight checks</h4><p>Verifies Apple Silicon, macOS version, AC power, no VPN, residential IP — before you waste time signing up.</p></div>
             <div class="feature"><h4>Onboarding wizard</h4><p>Embedded WKWebViews per signup, JS prefill of email + password, OTP auto-detect from your clipboard.</p></div>
-            <div class="feature"><h4>Unified dashboards</h4><p>One window with all six dashboards in a sidebar. Cookies persist, you stay signed in.</p></div>
+            <div class="feature"><h4>Unified dashboards</h4><p>One window with all eight dashboards in a sidebar. Cookies persist, you stay signed in.</p></div>
+            <div class="feature"><h4>Earnings tracker</h4><p>Manual balance + payout entry that's the trusted source of truth. CSV export for taxes. Live USD total in your menu bar.</p></div>
+            <div class="feature"><h4>Verus CPU mining</h4><p>Apple Silicon's hidden gem — VerusHash 2.2 runs unusually well on M-series. Idle manages the daemon and surfaces hashrate.</p></div>
             <div class="feature"><h4>Stay-awake + battery care</h4><p>Manages caffeinate so the Mac stays online 24/7. Recommends macOS 80% charging limit.</p></div>
             <div class="feature"><h4>Launch at login</h4><p>SMAppService integration so Idle starts when your Mac wakes. No Terminal required.</p></div>
-            <div class="feature"><h4>Referral attribution</h4><p>Refer friends, earn 10% of their earnings forever. Tracked inside Idle.</p></div>
+            <div class="feature"><h4>Zero telemetry</h4><p>No analytics, no crash reporting, no third-party SDKs in the binary. Read the source — it's all there.</p></div>
         </div>
     </section>
 
