@@ -9,8 +9,10 @@ struct EarningsDashboardView: View {
     @ObservedObject var earnings: Earnings
     @ObservedObject var history: EarningsHistory
     @ObservedObject var prices: PriceFetcher
+    @ObservedObject var manual: ManualEarnings
 
     @State private var range: TimeRange = .last7d
+    @State private var entrySheet: DePinApp? = nil
 
     enum TimeRange: String, CaseIterable, Identifiable {
         case last24h, last7d, last30d, all
@@ -76,27 +78,37 @@ struct EarningsDashboardView: View {
     }
 
     private var totalsCard: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 32) {
+        HStack(alignment: .top, spacing: 32) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Total earnings — USD equivalent").font(.caption).foregroundStyle(.secondary)
-                Text(formatUSD(earnings.totalUSD))
+                Text("Trusted total — your typed-in numbers")
+                    .font(.caption).foregroundStyle(.secondary)
+                Text(formatUSD(manual.trustableUSD))
                     .font(.system(size: 40, weight: .bold).monospacedDigit())
                     .foregroundStyle(.green)
+                Text("\(manual.payouts.count) payouts logged · \(uniqueAppsWithBalance) apps with current balance")
+                    .font(.caption2).foregroundStyle(.secondary)
             }
             Spacer()
             VStack(alignment: .leading, spacing: 4) {
-                Text("Active apps").font(.caption).foregroundStyle(.secondary)
-                Text("\(activeAppCount) / 6")
-                    .font(.title2.bold().monospacedDigit())
+                Text("Scraper estimate").font(.caption).foregroundStyle(.secondary)
+                Text(formatUSD(earnings.totalUSD))
+                    .font(.title.bold().monospacedDigit())
+                    .foregroundStyle(.orange)
+                Text("auto, less reliable")
+                    .font(.caption2).foregroundStyle(.secondary)
             }
             VStack(alignment: .leading, spacing: 4) {
-                Text("Recorded snapshots").font(.caption).foregroundStyle(.secondary)
-                Text("\(history.entries.count)")
+                Text("Active apps").font(.caption).foregroundStyle(.secondary)
+                Text("\(activeAppCount) / \(AppRegistry.all.count)")
                     .font(.title2.bold().monospacedDigit())
             }
         }
         .padding(20)
         .background(RoundedRectangle(cornerRadius: 14).fill(Color.gray.opacity(0.08)))
+    }
+
+    private var uniqueAppsWithBalance: Int {
+        Set(manual.balances.map(\.appId)).count
     }
 
     private var chartCard: some View {
@@ -138,11 +150,27 @@ struct EarningsDashboardView: View {
 
     private var perAppGrid: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Per app").font(.headline)
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 220), spacing: 12)], spacing: 12) {
+            HStack {
+                Text("Per app").font(.headline)
+                Spacer()
+                Text("Click any card to enter your own number")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 240), spacing: 12)], spacing: 12) {
                 ForEach(AppRegistry.all) { app in
-                    AppEarningCard(app: app, reading: earnings.readings[app.id], history: history)
+                    AppEarningCard(
+                        app: app,
+                        reading: earnings.readings[app.id],
+                        manualBalance: manual.latestBalance(for: app.id),
+                        payoutTotal: manual.allPayouts(for: app.id).reduce(0) { $0 + $1.amount },
+                        onUpdate: { entrySheet = app }
+                    )
                 }
+            }
+        }
+        .sheet(item: $entrySheet) { app in
+            ManualEntrySheet(app: app, manual: manual) {
+                entrySheet = nil
             }
         }
     }
@@ -228,31 +256,52 @@ struct EarningsDashboardView: View {
 private struct AppEarningCard: View {
     let app: DePinApp
     let reading: Earnings.Reading?
-    @ObservedObject var history: EarningsHistory
+    let manualBalance: ManualEarnings.Balance?
+    let payoutTotal: Double
+    let onUpdate: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Image(systemName: "leaf.fill").foregroundStyle(.green).font(.caption)
-                Text(app.name).font(.subheadline.weight(.medium))
-                Spacer()
-                Text(payoutLabel).font(.caption2).foregroundStyle(.secondary)
+        Button(action: onUpdate) {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Image(systemName: "leaf.fill").foregroundStyle(.green).font(.caption)
+                    Text(app.name).font(.subheadline.weight(.medium))
+                    Spacer()
+                    Text(payoutLabel).font(.caption2).foregroundStyle(.secondary)
+                }
+                Text(primaryLabel).font(.title3.bold().monospacedDigit())
+                    .foregroundStyle(primaryColor)
+                Text(secondaryLabel).font(.caption2).foregroundStyle(.secondary)
+                if payoutTotal > 0 {
+                    Text("paid out: \(String(format: "%.2f %@", payoutTotal, currencyCode))")
+                        .font(.caption2).foregroundStyle(.green)
+                }
             }
-            Text(amountLabel).font(.title3.bold().monospacedDigit())
-            Text(updatedLabel).font(.caption2).foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(14)
+            .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray.opacity(0.05)))
+            .contentShape(Rectangle())
         }
-        .padding(14)
-        .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray.opacity(0.05)))
+        .buttonStyle(.plain)
     }
 
-    private var payoutLabel: String {
+    private var payoutLabel: String { currencyCode }
+
+    private var currencyCode: String {
         switch app.payoutKind {
         case .usd: return "USD"
         case .token(let s): return s
         }
     }
 
-    private var amountLabel: String {
+    /// Prefer manual balance over scraper reading. Manual is trusted; scraper is fragile.
+    private var primaryLabel: String {
+        if let manual = manualBalance {
+            switch manual.currency {
+            case "USD": return String(format: "$%.2f", manual.amount)
+            default: return String(format: "%.4f %@", manual.amount, manual.currency)
+            }
+        }
         guard let amount = reading?.amount else { return "—" }
         switch reading?.currency {
         case "USD": return String(format: "$%.2f", amount)
@@ -261,10 +310,17 @@ private struct AppEarningCard: View {
         }
     }
 
-    private var updatedLabel: String {
-        if let asOf = reading?.asOf {
-            return "Updated \(asOf.formatted(.relative(presentation: .numeric)))"
+    private var primaryColor: Color {
+        manualBalance != nil ? .primary : .secondary
+    }
+
+    private var secondaryLabel: String {
+        if let manual = manualBalance {
+            return "Manual entry · \(manual.ts.formatted(.relative(presentation: .numeric)))"
         }
-        return "No data yet"
+        if let asOf = reading?.asOf, reading?.amount != nil {
+            return "Auto-scraped · \(asOf.formatted(.relative(presentation: .numeric)))"
+        }
+        return "Click to enter your balance"
     }
 }

@@ -31,6 +31,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let earningsHistory = EarningsHistory()
     private let prices = PriceFetcher()
     private let mining = Mining()
+    private let manualEarnings = ManualEarnings()
     private var welcomeWindow: NSWindow?
     private var earningsWindow: NSWindow?
     private var earningsObserver: AnyObject?
@@ -74,8 +75,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // background.
         earnings.startPolling()
 
-        // Update menu bar title with live total whenever earnings change.
-        earningsObserver = earnings.$readings.sink { [weak self] _ in
+        // Update menu bar title with live total whenever earnings or manual
+        // entries change. Trusted total (manual) wins over scraper estimate.
+        earningsObserver = Publishers.CombineLatest(
+            earnings.$readings,
+            Publishers.Merge(manualEarnings.$balances.map { _ in () }, manualEarnings.$payouts.map { _ in () })
+        )
+        .sink { [weak self] _ in
             Task { @MainActor in self?.refreshStatusBarTitle() }
         }
 
@@ -95,13 +101,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    /// Refresh the menu bar status item to show the running USD total.
-    /// Falls back to "Idle" when there's no readable balance yet.
+    /// Refresh the menu bar status item.
+    /// Trusted total (manual entries + payouts) wins. Scraper estimate is
+    /// only used as a fallback when no manual data exists.
     private func refreshStatusBarTitle() {
         guard let button = statusItem.button else { return }
-        let total = earnings.totalUSD
-        if total > 0 {
-            button.title = String(format: "Idle · $%.2f", total)
+        let trusted = manualEarnings.trustableUSD
+        if trusted > 0 {
+            button.title = String(format: "Idle · $%.2f", trusted)
         } else {
             button.title = "Idle"
         }
@@ -199,7 +206,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             rootView: EarningsDashboardView(
                 earnings: earnings,
                 history: earningsHistory,
-                prices: prices
+                prices: prices,
+                manual: manualEarnings
             )
         )
         window.makeKeyAndOrderFront(nil)
