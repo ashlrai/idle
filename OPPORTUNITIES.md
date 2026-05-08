@@ -6,6 +6,11 @@ a 16GB MacBook Air running 24/7 on residential US Wi-Fi as of May 2026.
 
 Honest framing throughout. No "$500/month from your laptop" claims.
 
+> **Hardware tier matters.** Section S below ("Scaling with a high-spec second
+> Mac") is for users with a 32GB+ Mac that can handle compute-tier services
+> (Salad, Darkbloom, Storj). The Tier A-E sections below are sized for the
+> 16GB starter machine.
+
 ---
 
 ## Tier A — actually worth installing
@@ -219,3 +224,80 @@ themselves.
 
 These are the levers that take Idle from "tracks 6 services" to "the actual
 operator's-dashboard for a Mac-based passive-income stack."
+
+---
+
+## Section S — Scaling with a high-spec second Mac (32GB+, ideally 128GB)
+
+If you have a second Mac in the same household and want to scale beyond
+~$15-30/mo bandwidth income, here's the honest playbook. **Do not assume
+adding a second Mac doubles your bandwidth income** — it doesn't, because
+the DePIN bandwidth services fingerprint by residential IP, not by device.
+
+### Multi-device same-IP rules — verified May 2026
+
+| Service | Multi-device on same IP? | Effect |
+|---|---|---|
+| Pawns.app | ✗ One account per IP | Second account shadow-banned, primary risks suspension |
+| Honeygain | ✗ Throws "Network overused" error | Second instance won't share |
+| EarnApp | ✗ Detected via BrightData IP fingerprint | Secondary device earns 0 |
+| Grass | ✗ Tier system based on per-IP uptime, not per-device | No benefit from second device |
+| Nodepay | ✗ Per-IP attribution | Same as above |
+| MystNodes | ✓ Per-node, not per-IP | Two nodes both register and earn separately |
+| Verus mining | ✓ CPU-bound, not IP-bound | Hashrate stacks across machines |
+| Salad | ✓ Compute-bound, device-keyed | Each Mac earns independently |
+| Storj | ✓ Storage node, identity-keyed | Each node earns separately |
+| Brave Rewards | ✓ Browser-keyed | Per-browser, not per-IP |
+
+### Strategy: split the stack across the two devices
+
+The 16GB Mac is the **bandwidth tier**. Don't touch its setup once running.
+
+The second Mac (any 32GB+, ideally 128GB+) is the **compute / mining /
+storage tier**. Run these:
+
+1. **Salad** ($10-25/mo) — proven, easy install. Bigger Mac = bigger
+   workloads = bigger payout. salad.com → macOS app → log in.
+2. **Storj** ($1-3/mo per TB allocated) — open a storage node, allocate
+   ~half your free SSD. storj.io → Become a Storage Node Operator.
+3. **MystNodes second instance** ($3-8/mo MYST) — register a second node ID
+   on the same Mysterium account. Mysterium prices per-node.
+4. **Verus CPU mining** ($3-5/mo at higher thread count) — same setup as
+   the first Mac, separate wallet.dat OR pool to one address (your call).
+5. **Brave Rewards** ($3-8/mo) — set Brave as default browser, opt into
+   privacy-respecting ads.
+
+### 128GB-only tier (don't bother below 64GB unified memory)
+
+6. **Darkbloom** (Eigen Labs Apple Silicon AI inference) — needs 36GB+
+   for the smallest model, 128GB+ for the headline-payout 122B MoE tier.
+   Marketing claims $800-1,100/mo for a Mac Studio at 18hr/day. Reality
+   in May 2026: only ~21 active providers, low request volume, Eigen Labs
+   themselves say "research preview, not production." Realistic today:
+   $0-50/mo. Worth installing for airdrop optionality if/when they
+   tokenize. Don't budget it.
+7. **Bittensor TAO subnets** — some subnets accept Apple-Silicon-only
+   contribution. Requires registering a hotkey ($200-500 in TAO) plus
+   ongoing stake. Realistic: $20-150/mo on a winning subnet, $0 on a
+   losing one. Skip unless you'll study subnets actively.
+
+### Realistic combined-household income
+
+| Source | 16GB Air | 128GB Pro | Combined |
+|---|---|---|---|
+| Bandwidth apps (IP-bound) | $15-30 | $0 | $15-30 |
+| MystNodes | $3-5 MYST | +$3-5 MYST | $6-10 MYST |
+| Verus mining | $1-3 | $3-5 | $4-8 |
+| Salad | – | $10-25 | $10-25 |
+| Storj 1TB | – | $1-3 | $1-3 |
+| Brave Rewards | – | $3-8 | $3-8 |
+| **Tier A combined (proven)** | | | **$40-80/mo** |
+| Darkbloom (speculative) | – | $0-300 | $0-300 |
+| Bittensor (speculative) | – | $0-150 | $0-150 |
+
+**To reach $200-300/mo from this household alone**: Darkbloom must actually
+pay (out of your control) OR Bittensor subnet luck (active management).
+
+**The reliable path to $200-300/mo**: distribute Idle. Each install routes
+through the operator's referral codes; 50 users × $20/mo × 10% = $100/mo
+recurring per 50 users. That compounds without you adding more hardware.

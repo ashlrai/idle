@@ -38,6 +38,7 @@ enum AppRegistry {
         var mystNodes: String?
         var nodepay: String?
         var repocket: String?
+        var salad: String?
     }
 
     static var referrals = ReferralCodes(
@@ -47,7 +48,8 @@ enum AppRegistry {
         earnApp: nil,
         mystNodes: nil,
         nodepay: nil,
-        repocket: nil
+        repocket: nil,
+        salad: nil
     )
 
     static var all: [DePinApp] {
@@ -135,6 +137,22 @@ enum AppRegistry {
                 directDownloadURL: nil,
                 kind: .nativeApp,
                 payoutKind: .usd
+            ),
+            DePinApp(
+                id: "salad",
+                // Salad pays cash/gift-cards for compute (CPU/GPU cycles, AI workloads).
+                // Different category from the bandwidth-resale DePIN apps above —
+                // doesn't conflict with bandwidth IP fingerprinting, so it's the
+                // primary recommended add-on for users with a 32GB+ second Mac.
+                name: "Salad",
+                bundleIdentifier: "com.salad.SaladDesktop",
+                appPath: "/Applications/Salad.app",
+                signupURL: saladSignupURL(),
+                dashboardURL: URL(string: "https://app.salad.com/")!,
+                downloadURL: URL(string: "https://salad.com/download"),
+                directDownloadURL: nil,
+                kind: .nativeApp,
+                payoutKind: .usd
             )
         ]
     }
@@ -202,5 +220,13 @@ enum AppRegistry {
             return URL(string: "https://link.repocket.com/?aid=\(code)")!
         }
         return URL(string: "https://link.repocket.com/")!
+    }
+
+    private static func saladSignupURL() -> URL {
+        // Salad uses ?referral=<code> on the signup flow.
+        if let code = referrals.salad {
+            return URL(string: "https://salad.com/?referral=\(code)")!
+        }
+        return URL(string: "https://salad.com/")!
     }
 }

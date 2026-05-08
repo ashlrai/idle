@@ -1,6 +1,6 @@
 {
   "_comment": "Idle remote config. Idle clients fetch this on launch and override compile-time referral defaults. Cached for 5 min by Vercel.",
-  "version": "0.5.1",
+  "version": "0.7.0",
   "minClientVersion": "0.5.0",
   "downloadURL": "https://github.com/ashlrai/idle/releases/latest/download/Idle.dmg",
   "referrals": {
@@ -9,7 +9,9 @@
     "honeygain": "TILLY0FB7C",
     "earnApp": "QyKU9IyV",
     "mystNodes": "qcCBeULilzv7STk4iRQCUgdWne61beZdZGH7Jqyh",
-    "nodepay": "2ykvnpj87882786"
+    "nodepay": "2ykvnpj87882786",
+    "repocket": null,
+    "salad": null
   },
   "announcements": []
 }

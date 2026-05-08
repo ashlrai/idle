@@ -19,6 +19,7 @@ final class RemoteConfig: ObservableObject {
             let mystNodes: String?
             let nodepay: String?
             let repocket: String?
+            let salad: String?
         }
         let version: String?
         let minClientVersion: String?
@@ -72,7 +73,8 @@ final class RemoteConfig: ObservableObject {
             earnApp: payload.referrals.earnApp ?? AppRegistry.referrals.earnApp,
             mystNodes: payload.referrals.mystNodes ?? AppRegistry.referrals.mystNodes,
             nodepay: payload.referrals.nodepay ?? AppRegistry.referrals.nodepay,
-            repocket: payload.referrals.repocket ?? AppRegistry.referrals.repocket
+            repocket: payload.referrals.repocket ?? AppRegistry.referrals.repocket,
+            salad: payload.referrals.salad ?? AppRegistry.referrals.salad
         )
         if let list = payload.announcements {
             self.announcements = list
