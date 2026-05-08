@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import Combine
 
 @main
 struct IdleApp {
@@ -32,6 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let mining = Mining()
     private var welcomeWindow: NSWindow?
     private var earningsWindow: NSWindow?
+    private var earningsObserver: AnyObject?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -62,13 +64,46 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         prices.startPolling()
         Task { await remoteConfig.refresh() }
 
+        // Pre-load each app's dashboard WKWebView at launch so the earnings
+        // scraper has DOM to read against. Without this the cache is empty
+        // until the user opens the Dashboards window.
+        preloadDashboardWebViews()
+
+        // Earnings polling runs continuously from launch, not only when the
+        // user opens a window. The JSONL log fills in passively in the
+        // background.
+        earnings.startPolling()
+
+        // Update menu bar title with live total whenever earnings change.
+        earningsObserver = earnings.$readings.sink { [weak self] _ in
+            Task { @MainActor in self?.refreshStatusBarTitle() }
+        }
+
         if !UserDefaults.hasCompletedWelcome {
-            // Slight delay so the menu bar is fully rendered when the welcome
-            // window pops up — avoids the hosting controller competing with
-            // status item layout.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
                 self?.showWelcome()
             }
+        }
+    }
+
+    /// Initialize a hidden WKWebView per app so cookies/auth load and the
+    /// scraper has data to read. We do NOT add them to a window — they live
+    /// in WebViewCache.shared and are queried by Earnings.refreshAll().
+    private func preloadDashboardWebViews() {
+        for app in AppRegistry.all {
+            _ = WebViewCache.shared.view(for: "dashboard.\(app.id)", url: app.dashboardURL)
+        }
+    }
+
+    /// Refresh the menu bar status item to show the running USD total.
+    /// Falls back to "Idle" when there's no readable balance yet.
+    private func refreshStatusBarTitle() {
+        guard let button = statusItem.button else { return }
+        let total = earnings.totalUSD
+        if total > 0 {
+            button.title = String(format: "Idle · $%.2f", total)
+        } else {
+            button.title = "Idle"
         }
     }
 
